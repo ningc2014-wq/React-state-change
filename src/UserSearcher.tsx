@@ -11,9 +11,7 @@ interface User {
 const UserSearcher: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  // ★追加: 性別フィルター用のState
-  const [genderFilter, setGenderFilter] = useState<'' | 'Male' | 'Female'>(''); // 全て、男性、女性
-
+  const [genderFilter, setGenderFilter] = useState<'' | 'Male' | 'Female'>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // データ取得（非同期通信）
@@ -23,12 +21,14 @@ const UserSearcher: React.FC = () => {
         const response = await fetch('https://jsonplaceholder.typicode.com/users');
         const data: User[] = await response.json();
         
-        // ★追加: 取得した各ユーザーにランダムで性別を付与
+        // 取得した各ユーザーにランダムで性別を付与
         const usersWithGender = data.map(user => ({
           ...user,
-          gender: Math.random() > 0.5 ? 'Male' : 'Female' // 50%の確率で男性か女性を割り当てる
+          gender: Math.random() > 0.5 ? 'Male' : 'Female'
         }));
-        setUsers(usersWithGender); // 性別付きのデータをStateに格納
+        
+        // ★修正点: 型アサーション (as User[]) を追加し、TypeScriptに明示的に型を伝えます
+        setUsers(usersWithGender as User[]); 
 
       } catch (error) {
         console.error("データ取得エラー:", error);
@@ -45,7 +45,7 @@ const UserSearcher: React.FC = () => {
     const matchesSearchTerm = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                               user.email.toLowerCase().includes(searchTerm.toLowerCase());
 
-    // ★追加: 性別での検索条件
+    // 性別での検索条件
     const matchesGender = genderFilter === '' || user.gender === genderFilter;
 
     return matchesSearchTerm && matchesGender; // 両方の条件を満たすユーザーを返す
@@ -64,7 +64,7 @@ const UserSearcher: React.FC = () => {
         style={{ padding: '10px', width: '100%', marginBottom: '10px', fontSize: '16px' }}
       />
 
-      {/* ★追加: 性別フィルター用ドロップダウン */}
+      {/* 性別フィルター用ドロップダウン */}
       <select
         value={genderFilter}
         onChange={(e) => setGenderFilter(e.target.value as '' | 'Male' | 'Female')}
@@ -87,7 +87,7 @@ const UserSearcher: React.FC = () => {
               <div key={user.id} style={{ borderBottom: '1px dotted #eee', padding: '10px' }}>
                 <p><strong>名前:</strong> {user.name}</p>
                 <p><strong>Email:</strong> {user.email}</p>
-                <p><strong>性別:</strong> {user.gender || '不明'}</p> {/* 性別を表示、なければ「不明」 */}
+                <p><strong>性別:</strong> {user.gender || '不明'}</p>
               </div>
             ))
           )}
